@@ -6,6 +6,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+
 // Function prototypes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -64,6 +68,20 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+
+    // Initialize ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
+
+    // Setup ImGui style
+    ImGui::StyleColorsDark();
+
+    // Initialize ImGui backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+
 
     // Build and compile the vertex shader
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -143,31 +161,57 @@ int main()
 
     glm::mat4 MVP = projection * view * model;
 
+    bool showTriangle = true;
+
     // Render loop
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
-        // Render
+        // Start ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // Render ImGui UI
+        ImGui::Begin("Control Panel");
+        if (ImGui::Button("Toggle Triangle"))
+        {
+            showTriangle = !showTriangle;
+        }
+        ImGui::End();
+
+           // Render
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        if (showTriangle)
+        {
+            // Use the shader program and draw the triangle
+            glUseProgram(shaderProgram);
 
-        // Use the shader program and draw the triangle
-        glUseProgram(shaderProgram);
 
+            int mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
+            MVP = MVP*glm::rotate(glm::mat4(1.0), 0.01f, glm::vec3(0,1,0));
 
-        int mvpLoc = glGetUniformLocation(shaderProgram, "MVP");
-        MVP = MVP*glm::rotate(glm::mat4(1.0), 0.01f, glm::vec3(0,1,0));
+            glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
+            
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
 
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
-        
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        // Render ImGui
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Swap buffers and poll IO events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    // Cleanup ImGui
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     // Deallocate resources
     glDeleteVertexArrays(1, &VAO);

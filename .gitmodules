@@ -4,3 +4,6 @@
 [submodule "ext/glfw"]
 	path = ext/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "ext/ImGUI"]
+	path = ext/ImGUI
+	url = https://github.com/ocornut/imgui.git
