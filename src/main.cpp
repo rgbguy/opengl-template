@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Shader Triangle", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenGL Sample App", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -62,9 +62,12 @@ int main(int argc, char* argv[])
     glUseProgram(shaderProgram);
 
     float vertices[] = {
-         0.0f,  0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f
+        -1.0f,  1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f
     };
 
     unsigned int VBO, VAO;
@@ -87,7 +90,7 @@ int main(int argc, char* argv[])
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     glm::mat4 MVP = projection * view * model;
 
-    bool showTriangle = true;
+    bool showShape = true;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -98,15 +101,15 @@ int main(int argc, char* argv[])
         ImGui::NewFrame();
         ImGui::Begin("Control Panel");
 
-        if (ImGui::Button("Toggle Triangle"))
+        if (ImGui::Button("Toggle Visibility"))
         {
-            showTriangle = !showTriangle;
+            showShape = !showShape;
         }
         ImGui::End();
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        if (showTriangle)
+        if (showShape)
         {
             // Use the shader program and draw the triangle
             glUseProgram(shaderProgram);
@@ -118,7 +121,7 @@ int main(int argc, char* argv[])
             glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(MVP));
             
             glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
         }
 
         // Render ImGui
