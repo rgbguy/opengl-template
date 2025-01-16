@@ -4,7 +4,7 @@ set (CMAKE_CXX_STANDARD 11)
 project(OpenGL_Template)
 
 add_executable(${PROJECT_NAME}
-main.cpp)
+main.cpp shaders.cpp)
 
 find_package(OpenGL REQUIRED)
 
